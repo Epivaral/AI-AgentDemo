@@ -85,6 +85,7 @@ export default function TaskAgentChatbox() {
         ))}
         <div ref={chatEndRef} />
       </div>
+      <img src="./mascot.png" alt="Mascot" className="mascot-img" />
       <form className="chat-input" onSubmit={handleUserInput}>
         <input
           type="text"
