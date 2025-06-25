@@ -63,16 +63,38 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json"
         )
     user_message = body.get("message", "")
-    # Send to Azure OpenAI Assistant
-    response = client.chat.completions.create(
-        model="gpt-35-turbo",  # Or your deployment name
-        messages=[{"role": "user", "content": user_message}],
-        temperature=1,
-        top_p=1,
-        tools=None
-    )
     try:
-        reply = response.choices[0].message.content
+        # Use the Assistants API flow
+        thread = client.beta.threads.create()
+        client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=user_message
+        )
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=ASSISTANT_ID
+        )
+        # Wait for the run to complete (polling)
+        import time
+        while True:
+            run_status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+            if run_status.status in ["completed", "failed", "cancelled"]:
+                break
+            time.sleep(0.5)
+        if run_status.status != "completed":
+            return func.HttpResponse(
+                json.dumps({"error": f"Assistant run failed: {run_status.status}"}),
+                status_code=500,
+                mimetype="application/json"
+            )
+        messages = client.beta.threads.messages.list(thread_id=thread.id)
+        # Get the latest assistant message
+        reply = None
+        for m in messages.data:
+            if m.role == "assistant":
+                reply = m.content[0].text.value if m.content and hasattr(m.content[0], 'text') else None
+                break
         logging.info(f"Raw assistant reply: {repr(reply)}")
         if not reply or not reply.strip():
             return func.HttpResponse(
@@ -82,7 +104,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
         reply_json = json.loads(reply)
     except Exception as e:
-        logging.exception("Error parsing assistant response")
+        logging.exception("Error in assistant API flow or parsing response")
         return func.HttpResponse(
             json.dumps({"error": f"Invalid response from assistant: {str(e)}", "raw_reply": reply if 'reply' in locals() else None}),
             status_code=500,
