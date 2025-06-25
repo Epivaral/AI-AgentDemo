@@ -16,10 +16,11 @@
   min-height: 200px;
 }
 .chat-msg {
-  margin-bottom: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  max-width: 90%;
+  margin: 8px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  max-width: 80%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   word-break: break-word;
 }
 .chat-msg.agent {
@@ -48,6 +49,27 @@
   background: #f5f5f5;
   color: #444;
 }
+
+/* Add/override these styles for colored bubbles */
+
+.chat-msg.add {
+  background: #e3f0ff;
+  color: #1565c0;
+  border-left: 5px solid #1976d2;
+}
+
+.chat-msg.remove {
+  background: #e6f9ed;
+  color: #1b5e20;
+  border-left: 5px solid #43a047;
+}
+
+.chat-msg.tasks {
+  background: #f3e6ff;
+  color: #6a1b9a;
+  border-left: 5px solid #8e24aa;
+}
+
 .chat-input {
   display: flex;
   border-top: 1px solid #eee;

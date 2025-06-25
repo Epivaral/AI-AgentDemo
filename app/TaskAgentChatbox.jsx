@@ -9,6 +9,7 @@ export default function TaskAgentChatbox() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [threadId, setThreadId] = useState(() => localStorage.getItem('threadId') || null);
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -31,9 +32,13 @@ export default function TaskAgentChatbox() {
       const res = await fetch(BACKEND_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ message: input, thread_id: threadId })
       });
       const data = await res.json();
+      if (data.thread_id && data.thread_id !== threadId) {
+        setThreadId(data.thread_id);
+        localStorage.setItem('threadId', data.thread_id);
+      }
       let reply = '';
       let type = 'info';
       let tasks = null;
