@@ -3,6 +3,7 @@ import json
 import requests
 import azure.functions as func
 from openai import AzureOpenAI
+import logging
 
 client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -73,9 +74,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
         reply = response.choices[0].message.content
         reply_json = json.loads(reply)
-    except Exception:
+    except Exception as e:
+        logging.exception("Error parsing assistant response")
         return func.HttpResponse(
-            json.dumps({"error": "Invalid response from assistant."}),
+            json.dumps({"error": f"Invalid response from assistant: {str(e)}"}),
             status_code=500,
             mimetype="application/json"
         )
