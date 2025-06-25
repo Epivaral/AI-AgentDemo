@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './TaskAgentChatbox.css';
 
-const BACKEND_URL = 'http://localhost:8000/chat'; // Change to your backend URL if deployed
+const BACKEND_URL = '/api/chat'; // Use relative path for Azure Static Web Apps
 
 export default function TaskAgentChatbox() {
   const [messages, setMessages] = useState([
