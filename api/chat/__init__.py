@@ -138,8 +138,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if "value" in data and len(data["value"]) >= index:
                 task_id = data["value"][index-1]["Id"]
                 logging.info(f"Task ID to remove: {task_id}")
-                # Use OData-style delete URL
-                del_r = requests.delete(f"{TASKS_API}(Id={task_id})")
+                # Use REST-style delete URL
+                del_r = requests.delete(f"{TASKS_API}/Id/{task_id}")
                 logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
                 if del_r.ok:
                     result["task_removed"] = index
