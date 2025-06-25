@@ -1,20 +1,8 @@
 import os
 import json
 import requests
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
+import azure.functions as func
 from openai import AzureOpenAI
-
-app = FastAPI()
-
-# Allow CORS for local dev and your deployed frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -64,9 +52,15 @@ else:
 
 TASKS_API = "https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks"
 
-@app.post("/chat")
-async def main(req: Request):
-    body = await req.json()
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        body = req.get_json()
+    except ValueError:
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid JSON in request."}),
+            status_code=400,
+            mimetype="application/json"
+        )
     user_message = body.get("message", "")
     # Send to Azure OpenAI Assistant
     response = client.chat.completions.create(
@@ -80,7 +74,11 @@ async def main(req: Request):
         reply = response.choices[0].message.content
         reply_json = json.loads(reply)
     except Exception:
-        return {"error": "Invalid response from assistant."}
+        return func.HttpResponse(
+            json.dumps({"error": "Invalid response from assistant."}),
+            status_code=500,
+            mimetype="application/json"
+        )
 
     # Handle actions
     action = reply_json.get("action")
@@ -98,7 +96,6 @@ async def main(req: Request):
     elif action == "remove":
         index = reply_json.get("index")
         if index:
-            # Get all tasks
             r = requests.get(TASKS_API)
             data = r.json()
             if "value" in data and len(data["value"]) >= index:
@@ -115,8 +112,11 @@ async def main(req: Request):
         data = r.json()
         if "value" in data:
             result["tasks"] = [f"#{t['Id']}: {t['TaskText']} [{'Done' if t['Completed'] else 'Pending'}]" for t in data["value"]]
-    # Pass through chat/suggestion/help if present
     for k in ["chat", "suggestion", "help"]:
         if k in reply_json:
             result[k] = reply_json[k]
-    return result
+    return func.HttpResponse(
+        json.dumps(result),
+        status_code=200,
+        mimetype="application/json"
+    )
