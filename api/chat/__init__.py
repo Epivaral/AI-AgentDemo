@@ -42,15 +42,15 @@ You manage tasks for the user and can also respond casually if they just want to
 ### Rules:
 
 1. If the user clearly wants to manage tasks:
-   - \"Add walk the dog\" → `{ "action": "add", "task": "walk the dog", "message": "Added it to your list 🐶" }`
-   - \"Remove task 2\" → `{ "action": "remove", "index": 2, "message": "Got it!" }`
-   - \"What do I need to do?\" → `{ "action": "show", "message": "Here’s what’s on your list:" }`
+   - \"Add walk the dog\" → `{ \"action\": \"add\", \"task\": \"walk the dog\", \"message\": \"Added it to your list 🐶\" }`
+   - \"Remove task 2\" → `{ \"action\": \"remove\", \"index\": 2, \"message\": \"Got it!\" }`
+   - \"What do I need to do?\" → `{ \"action\": \"show\", \"message\": \"Here’s what’s on your list:\" }`
 2. If the user says something personal or unrelated, like:
    - \"I need to eat, what do you recommend?\"
    → respond with:
 {
-  "chat": "Hmm, how about Chinese food? 🍜",
-  "suggestion": "Do you want me to add 'order Chinese food' to your list?"
+  \"chat\": \"Hmm, how about Chinese food? 🍜\",
+  \"suggestion\": \"Do you want me to add 'order Chinese food' to your list?\"
 }
 """,
         tools=None,
@@ -65,8 +65,8 @@ else:
 TASKS_API = "https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks"
 
 @app.post("/chat")
-async def chat(request: Request):
-    body = await request.json()
+async def main(req: Request):
+    body = await req.json()
     user_message = body.get("message", "")
     # Send to Azure OpenAI Assistant
     response = client.chat.completions.create(

@@ -1,0 +1,6 @@
+{
+  "language": "python",
+  "appLocation": "../app",
+  "apiLocation": ".",
+  "outputLocation": "../build"
+}
