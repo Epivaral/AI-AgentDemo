@@ -129,15 +129,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if index:
             r = requests.get(TASKS_API)
             data = r.json()
+            logging.info(f"Task list for removal: {data}")
+            logging.info(f"Requested index for removal: {index}")
             if "value" in data and len(data["value"]) >= index:
                 task_id = data["value"][index-1]["Id"]
+                logging.info(f"Task ID to remove: {task_id}")
                 del_r = requests.delete(f"{TASKS_API}/{task_id}")
+                logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
                 if del_r.ok:
                     result["task_removed"] = index
                 else:
-                    result["error"] = "Failed to remove task."
+                    result["error"] = f"Failed to remove task. Status: {del_r.status_code}, Response: {del_r.text}"
             else:
-                result["error"] = "Task index out of range."
+                result["error"] = f"Task index out of range. Index: {index}, Task count: {len(data['value']) if 'value' in data else 0}"
     elif action == "show":
         r = requests.get(TASKS_API)
         data = r.json()
