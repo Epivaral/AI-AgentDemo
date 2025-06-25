@@ -73,11 +73,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     )
     try:
         reply = response.choices[0].message.content
+        logging.info(f"Raw assistant reply: {repr(reply)}")
+        if not reply or not reply.strip():
+            return func.HttpResponse(
+                json.dumps({"error": "Assistant returned an empty response."}),
+                status_code=500,
+                mimetype="application/json"
+            )
         reply_json = json.loads(reply)
     except Exception as e:
         logging.exception("Error parsing assistant response")
         return func.HttpResponse(
-            json.dumps({"error": f"Invalid response from assistant: {str(e)}"}),
+            json.dumps({"error": f"Invalid response from assistant: {str(e)}", "raw_reply": reply if 'reply' in locals() else None}),
             status_code=500,
             mimetype="application/json"
         )
