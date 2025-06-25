@@ -63,9 +63,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json"
         )
     user_message = body.get("message", "")
+    thread_id = body.get("thread_id")
     try:
-        # Use the Assistants API flow
-        thread = client.beta.threads.create()
+        # Use the Assistants API flow with persistent thread
+        if thread_id:
+            thread = client.beta.threads.retrieve(thread_id=thread_id)
+        else:
+            thread = client.beta.threads.create()
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
@@ -84,7 +88,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             time.sleep(0.5)
         if run_status.status != "completed":
             return func.HttpResponse(
-                json.dumps({"error": f"Assistant run failed: {run_status.status}"}),
+                json.dumps({"error": f"Assistant run failed: {run_status.status}", "thread_id": thread.id}),
                 status_code=500,
                 mimetype="application/json"
             )
@@ -98,7 +102,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(f"Raw assistant reply: {repr(reply)}")
         if not reply or not reply.strip():
             return func.HttpResponse(
-                json.dumps({"error": "Assistant returned an empty response."}),
+                json.dumps({"error": "Assistant returned an empty response.", "thread_id": thread.id}),
                 status_code=500,
                 mimetype="application/json"
             )
@@ -106,7 +110,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.exception("Error in assistant API flow or parsing response")
         return func.HttpResponse(
-            json.dumps({"error": f"Invalid response from assistant: {str(e)}", "raw_reply": reply if 'reply' in locals() else None}),
+            json.dumps({"error": f"Invalid response from assistant: {str(e)}", "raw_reply": reply if 'reply' in locals() else None, "thread_id": thread.id if 'thread' in locals() else None}),
             status_code=500,
             mimetype="application/json"
         )
@@ -134,7 +138,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if "value" in data and len(data["value"]) >= index:
                 task_id = data["value"][index-1]["Id"]
                 logging.info(f"Task ID to remove: {task_id}")
-                del_r = requests.delete(f"{TASKS_API}/{task_id}")
+                # Use OData-style delete URL
+                del_r = requests.delete(f"{TASKS_API}(Id={task_id})")
                 logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
                 if del_r.ok:
                     result["task_removed"] = index
@@ -150,6 +155,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     for k in ["chat", "suggestion", "help"]:
         if k in reply_json:
             result[k] = reply_json[k]
+    result["thread_id"] = thread.id
     return func.HttpResponse(
         json.dumps(result),
         status_code=200,
