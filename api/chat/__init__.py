@@ -34,19 +34,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         tasks_resp = requests.get(TASKS_API)
         tasks_data = tasks_resp.json()
         tasks_list = tasks_data.get("value", [])
-        # Format as a system message for the assistant
+        # Format as a prefix for the user message
         if tasks_list:
             task_lines = [
                 f"- {t['TaskText']} [{'Done' if t['Completed'] else 'Pending'}] (ID: {t['Id']})"
                 for t in tasks_list
             ]
-            system_message = (
-                "Here is the current list of tasks (with their status and ID):\n" + "\n".join(task_lines)
+            tasks_prefix = (
+                "Here is the current list of tasks (with their status and ID):\n" + "\n".join(task_lines) + "\n\n"
             )
         else:
-            system_message = "There are currently no tasks."
+            tasks_prefix = "There are currently no tasks.\n\n"
     except Exception as e:
-        system_message = "(Could not fetch tasks for context.)"
+        tasks_prefix = "(Could not fetch tasks for context.)\n\n"
 
     try:
         # Use the Assistants API flow with persistent thread
@@ -54,17 +54,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             thread = client.beta.threads.retrieve(thread_id=thread_id)
         else:
             thread = client.beta.threads.create()
-        # Add system message with current tasks
-        client.beta.threads.messages.create(
-            thread_id=thread.id,
-            role="system",
-            content=system_message
-        )
-        # Add user message
+        # Add user message with tasks context prepended
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=user_message
+            content=tasks_prefix + user_message
         )
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
