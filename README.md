@@ -20,6 +20,9 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 - Displays a loading screen with a spinner/message while the Data API is waking up, ensuring a smooth user experience.
 
 ## How it works
+
+![Diagram](diagram.png)
+
 - **Frontend:** React app with a modern chatbox UI, color-coded bubbles for different actions, persistent chat context, a floating notification for pending tasks, and a loading screen while the Data API is waking up.
 - **Backend:** Azure Functions (Python) exposes an `/api/chat` endpoint. It:
   - Receives user messages and (optionally) a thread ID.
