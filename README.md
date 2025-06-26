@@ -8,9 +8,11 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 - Handles casual chat and suggestions, not just task management.
 - All task data is stored in a SQL database and accessed via a RESTful Data API.
 - The AI agent interprets user input and manages tasks via the backend.
+- Shows a floating notification every 15 seconds (for 5 seconds) with the number of pending tasks, styled as a modern email alert in the top-right corner.
+- Task lists are displayed as a table (ID, Task, Status) inside the chatbox for better readability.
 
 ## How it works
-- **Frontend:** React app with a modern chatbox UI, color-coded bubbles for different actions, and persistent chat context.
+- **Frontend:** React app with a modern chatbox UI, color-coded bubbles for different actions, persistent chat context, and a floating notification for pending tasks.
 - **Backend:** Azure Functions (Python) exposes an `/api/chat` endpoint. It:
   - Receives user messages and (optionally) a thread ID.
   - Uses Azure OpenAI Assistants API to interpret the message and maintain conversation context.
@@ -45,6 +47,9 @@ Interact with the chatbox using natural language. Here are some example commands
   - `what should I eat for lunch?`
   - `tell me a joke`
 
+You will see a floating notification in the top-right corner every 15 seconds (for 5 seconds) showing how many tasks are still pending, with an email icon.
+When you ask to "show" or "list" your tasks, they will be displayed as a table (ID, Task, Status) for easy reading.
+
 The agent will understand your intent, manage your tasks, and keep the conversation context-aware.
 
 ---
@@ -67,7 +72,13 @@ The agent will understand your intent, manage your tasks, and keep the conversat
 ### 2. Set up Azure OpenAI and create an Assistant
 - **Provision an Azure OpenAI resource** in your Azure subscription.
 - Deploy a model (e.g., `gpt-35-turbo`).
-- In Azure OpenAI Studio (or via API), create an Assistant with instructions to always reply in JSON and handle task management logic.
+- In Azure OpenAI Studio (or via API), create an Assistant with instructions to always reply in JSON and handle task management logic. Example instructions:
+  - Always reply in JSON with keys: `action`, `message`, and (if relevant) `id`, `task`, or `tasks`.
+  - Supported actions: `add`, `remove`, `show`, `complete`, `chat`, `suggestion`, `help`.
+  - For `show`, return a list of all tasks with their IDs, text, and completion status.
+  - For `add`, include the new task text.
+  - For `remove` or `complete`, include the task ID.
+  - For `chat`, `suggestion`, or `help`, include a helpful message.
 - Note the Assistant ID for use in your backend.
 
 ### 3. Build the backend (Azure Functions Python API)
@@ -88,6 +99,8 @@ The agent will understand your intent, manage your tasks, and keep the conversat
   - Stores and sends the `thread_id` with each request to maintain chat context.
   - Handles user input, sends it to `/api/chat`, and displays the agent's response.
   - Shows instructions and a modern, responsive layout.
+  - Renders the task list as a table (ID, Task, Status) for better readability.
+  - Includes a floating notification component that polls the backend every 15 seconds and shows the number of pending tasks for 5 seconds in the top-right corner.
 - Style the chatbox and page using CSS for a clean, modern look.
 
 ### 5. Deploy as an Azure Static Web App
@@ -99,6 +112,7 @@ The agent will understand your intent, manage your tasks, and keep the conversat
 - Open your deployed app in a browser.
 - Try commands like "add walk the dog", "remove 2", "what do I need to do?", or "mark task 2 as done".
 - The agent should manage your tasks and chat with you, with context preserved across messages.
+- Confirm that the floating notification appears and the task list is shown as a table.
 - Debug and improve as needed (e.g., error handling, UI tweaks, assistant instructions).
 
 ---
