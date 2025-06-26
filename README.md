@@ -5,7 +5,7 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 ![frontpage](img/page.png)
 
 ## Live Demo & API
-- **Site:** <a href="https://lemon-pebble-088965b1e.1.azurestaticapps.net/" target="_blank">https://lemon-pebble-088965b1e.1.azurestaticapps.net/</a>
+- **Site:** <a href="https://purple-pond-030ad401e.2.azurestaticapps.net/ target="_blank">https://purple-pond-030ad401e.2.azurestaticapps.net/</a>
 - **Data API:** <a href="https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks" target="_blank">https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks</a>
 
 
