@@ -120,6 +120,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     message = reply_json.get("message", "")
     result = {"message": message}
 
+    # EXTRA LOGGING FOR DEBUGGING (remove after debugging)
+    logging.info(f"[DEBUG] Action received: {action}")
+    logging.info(f"[DEBUG] Full assistant reply_json: {json.dumps(reply_json)}")
+
     if action == "add":
         task = reply_json.get("task")
         if task:
@@ -135,6 +139,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
     elif action == "remove":
         task_id = reply_json.get("id") or reply_json.get("index")
+        logging.info(f"[DEBUG] REMOVE: task_id used: {task_id}")  # EXTRA LOGGING
         if task_id:
             del_r = requests.delete(f"{TASKS_API}/Id/{task_id}")
             logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
@@ -161,6 +166,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
     elif action == "complete":
         task_id = reply_json.get("id") or reply_json.get("index")
+        logging.info(f"[DEBUG] COMPLETE: task_id used: {task_id}")  # EXTRA LOGGING
         if task_id:
             patch_r = requests.patch(f"{TASKS_API}/Id/{task_id}", json={"Completed": True})
             logging.info(f"Patch response status: {patch_r.status_code}, body: {patch_r.text}")
