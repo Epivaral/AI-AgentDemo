@@ -55,7 +55,36 @@ export default function TaskAgentChatbox() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [threadId, setThreadId] = useState(() => localStorage.getItem('threadId') || null);
+  const [initialTasks, setInitialTasks] = useState(null); // null = not loaded, [] = loaded but empty
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
   const chatEndRef = useRef(null);
+
+  // Load task list on page load and show loading screen until ready
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchTasksWithRetry(retries = 10, delay = 2000) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const res = await fetch(TASKS_API);
+          if (!res.ok) throw new Error('DAB not ready');
+          const data = await res.json();
+          if (isMounted) {
+            setInitialTasks(data.value || []);
+            setShowInitialLoading(false);
+          }
+          return;
+        } catch {
+          if (i === retries - 1 && isMounted) {
+            setInitialTasks([]);
+            setShowInitialLoading(false);
+          }
+          await new Promise(r => setTimeout(r, delay));
+        }
+      }
+    }
+    fetchTasksWithRetry();
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -116,9 +145,20 @@ export default function TaskAgentChatbox() {
     return { id: match[1], text: match[2], status: match[3] };
   }
 
+  // Render loading screen if DAB is not ready
+  if (showInitialLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+        <div className="loading-message">Loading task data, please wait while the database API wakes up...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="task-agent-chatbox">
       <PendingTasksNotification />
+      {/* Optionally show the initial task list here, e.g. as a table or summary */}
       <div className="chat-messages">
         {messages.map((msg, i) => (
           <div key={i} className={`chat-msg ${msg.sender} ${msg.type || ''}`.trim()}>
