@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import azure.functions as func
+import logging  # Add logging
 from openai import AzureOpenAI
 
 client = AzureOpenAI(
@@ -90,6 +91,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=500,
                 mimetype="application/json"
             )
+        # Log the raw assistant reply for debugging
+        logging.info(f"Raw assistant reply: {reply}")
         # Robust JSON parsing with fallback
         try:
             reply_json = json.loads(reply)
