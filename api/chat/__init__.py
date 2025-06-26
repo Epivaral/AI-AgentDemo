@@ -128,15 +128,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 result["task_added"] = task
             else:
                 result["error"] = "Failed to add task."
+        return func.HttpResponse(
+            json.dumps({**result, "thread_id": thread.id}),
+            status_code=200,
+            mimetype="application/json"
+        )
     elif action == "remove":
-        task_id = reply_json.get("id")
-        index = reply_json.get("index")
-        if not task_id and index:
-            # Fallback: map index to ID from current task list
-            r = requests.get(TASKS_API)
-            data = r.json()
-            if "value" in data and len(data["value"]) >= index:
-                task_id = data["value"][index-1]["Id"]
+        task_id = reply_json.get("id") or reply_json.get("index")
         if task_id:
             del_r = requests.delete(f"{TASKS_API}/Id/{task_id}")
             logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
@@ -145,21 +143,24 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             else:
                 result["error"] = f"Failed to remove task. Status: {del_r.status_code}, Response: {del_r.text}"
         else:
-            result["error"] = "No task ID or valid index provided for removal."
+            result["error"] = "No task ID provided for removal."
+        return func.HttpResponse(
+            json.dumps({**result, "thread_id": thread.id}),
+            status_code=200,
+            mimetype="application/json"
+        )
     elif action == "show":
         r = requests.get(TASKS_API)
         data = r.json()
         if "value" in data:
             result["tasks"] = [f"#{t['Id']}: {t['TaskText']} [{'Done' if t['Completed'] else 'Pending'}]" for t in data["value"]]
+        return func.HttpResponse(
+            json.dumps({**result, "thread_id": thread.id}),
+            status_code=200,
+            mimetype="application/json"
+        )
     elif action == "complete":
-        task_id = reply_json.get("id")
-        index = reply_json.get("index")
-        if not task_id and index:
-            # Fallback: map index to ID from current task list
-            r = requests.get(TASKS_API)
-            data = r.json()
-            if "value" in data and len(data["value"]) >= index:
-                task_id = data["value"][index-1]["Id"]
+        task_id = reply_json.get("id") or reply_json.get("index")
         if task_id:
             patch_r = requests.patch(f"{TASKS_API}/Id/{task_id}", json={"Completed": True})
             logging.info(f"Patch response status: {patch_r.status_code}, body: {patch_r.text}")
@@ -168,7 +169,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             else:
                 result["error"] = f"Failed to complete task. Status: {patch_r.status_code}, Response: {patch_r.text}"
         else:
-            result["error"] = "No task ID or valid index provided for completion."
+            result["error"] = "No task ID provided for completion."
+        return func.HttpResponse(
+            json.dumps({**result, "thread_id": thread.id}),
+            status_code=200,
+            mimetype="application/json"
+        )
     for k in ["chat", "suggestion", "help"]:
         if k in reply_json:
             result[k] = reply_json[k]
