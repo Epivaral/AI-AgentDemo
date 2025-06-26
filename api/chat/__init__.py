@@ -129,48 +129,32 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             else:
                 result["error"] = "Failed to add task."
     elif action == "remove":
-        index = reply_json.get("index")
-        if index:
-            r = requests.get(TASKS_API)
-            data = r.json()
-            logging.info(f"Task list for removal: {data}")
-            logging.info(f"Requested index for removal: {index}")
-            if "value" in data and len(data["value"]) >= index:
-                task_id = data["value"][index-1]["Id"]
-                logging.info(f"Task ID to remove: {task_id}")
-                # Use REST-style delete URL
-                del_r = requests.delete(f"{TASKS_API}/Id/{task_id}")
-                logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
-                if del_r.ok:
-                    result["task_removed"] = index
-                else:
-                    result["error"] = f"Failed to remove task. Status: {del_r.status_code}, Response: {del_r.text}"
+        task_id = reply_json.get("id")
+        if task_id:
+            del_r = requests.delete(f"{TASKS_API}/Id/{task_id}")
+            logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
+            if del_r.ok:
+                result["task_removed"] = task_id
             else:
-                result["error"] = f"Task index out of range. Index: {index}, Task count: {len(data['value']) if 'value' in data else 0}"
+                result["error"] = f"Failed to remove task. Status: {del_r.status_code}, Response: {del_r.text}"
+        else:
+            result["error"] = "No task ID provided for removal."
     elif action == "show":
         r = requests.get(TASKS_API)
         data = r.json()
         if "value" in data:
             result["tasks"] = [f"#{t['Id']}: {t['TaskText']} [{'Done' if t['Completed'] else 'Pending'}]" for t in data["value"]]
     elif action == "complete":
-        index = reply_json.get("index")
-        if index:
-            r = requests.get(TASKS_API)
-            data = r.json()
-            logging.info(f"Task list for completion: {data}")
-            logging.info(f"Requested index for completion: {index}")
-            if "value" in data and len(data["value"]) >= index:
-                task_id = data["value"][index-1]["Id"]
-                logging.info(f"Task ID to complete: {task_id}")
-                # PATCH request to set Completed = true
-                patch_r = requests.patch(f"{TASKS_API}/Id/{task_id}", json={"Completed": True})
-                logging.info(f"Patch response status: {patch_r.status_code}, body: {patch_r.text}")
-                if patch_r.ok:
-                    result["task_completed"] = index
-                else:
-                    result["error"] = f"Failed to complete task. Status: {patch_r.status_code}, Response: {patch_r.text}"
+        task_id = reply_json.get("id")
+        if task_id:
+            patch_r = requests.patch(f"{TASKS_API}/Id/{task_id}", json={"Completed": True})
+            logging.info(f"Patch response status: {patch_r.status_code}, body: {patch_r.text}")
+            if patch_r.ok:
+                result["task_completed"] = task_id
             else:
-                result["error"] = f"Task index out of range. Index: {index}, Task count: {len(data['value']) if 'value' in data else 0}"
+                result["error"] = f"Failed to complete task. Status: {patch_r.status_code}, Response: {patch_r.text}"
+        else:
+            result["error"] = "No task ID provided for completion."
     for k in ["chat", "suggestion", "help"]:
         if k in reply_json:
             result[k] = reply_json[k]
