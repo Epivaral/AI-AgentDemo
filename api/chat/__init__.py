@@ -3,7 +3,6 @@ import json
 import requests
 import azure.functions as func
 from openai import AzureOpenAI
-import logging
 
 client = AzureOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -15,11 +14,6 @@ client = AzureOpenAI(
 ASSISTANT_ID = os.getenv("AZURE_ASSISTANT_ID")
 if not ASSISTANT_ID:
     raise RuntimeError("AZURE_ASSISTANT_ID is not set! Please define it in your Azure Function configuration.")
-
-# [DEBUG] Log Assistant ID and first 200 chars of instructions (remove after debugging)
-info = client.beta.assistants.retrieve(ASSISTANT_ID)
-logging.info(f"[DEBUG] Instructions being used: {info.instructions[:200]}")
-logging.info(f"[DEBUG] Using Assistant ID: {ASSISTANT_ID}")  # EXTRA LOGGING - remove after debugging
 
 TASKS_API = "https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks"
 
@@ -69,7 +63,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             if m.role == "assistant":
                 reply = m.content[0].text.value if m.content and hasattr(m.content[0], 'text') else None
                 break
-        logging.info(f"Raw assistant reply: {repr(reply)}")
         if not reply or not reply.strip():
             return func.HttpResponse(
                 json.dumps({"error": "Assistant returned an empty response.", "thread_id": thread.id}),
@@ -78,7 +71,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
         reply_json = json.loads(reply)
     except Exception as e:
-        logging.exception("Error in assistant API flow or parsing response")
         return func.HttpResponse(
             json.dumps({"error": f"Invalid response from assistant: {str(e)}", "raw_reply": reply if 'reply' in locals() else None, "thread_id": thread.id if 'thread' in locals() else None}),
             status_code=500,
@@ -89,10 +81,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     action = reply_json.get("action")
     message = reply_json.get("message", "")
     result = {"message": message}
-
-    # EXTRA LOGGING FOR DEBUGGING (remove after debugging)
-    logging.info(f"[DEBUG] Action received: {action}")
-    logging.info(f"[DEBUG] Full assistant reply_json: {json.dumps(reply_json)}")
 
     if action == "add":
         task = reply_json.get("task")
@@ -109,10 +97,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
     elif action == "remove":
         task_id = reply_json.get("id") or reply_json.get("index")
-        logging.info(f"[DEBUG] REMOVE: task_id used: {task_id}")  # EXTRA LOGGING
         if task_id:
             del_r = requests.delete(f"{TASKS_API}/Id/{task_id}")
-            logging.info(f"Delete response status: {del_r.status_code}, body: {del_r.text}")
             if del_r.ok:
                 result["task_removed"] = task_id
             else:
@@ -136,10 +122,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
     elif action == "complete":
         task_id = reply_json.get("id") or reply_json.get("index")
-        logging.info(f"[DEBUG] COMPLETE: task_id used: {task_id}")  # EXTRA LOGGING
         if task_id:
             patch_r = requests.patch(f"{TASKS_API}/Id/{task_id}", json={"Completed": True})
-            logging.info(f"Patch response status: {patch_r.status_code}, body: {patch_r.text}")
             if patch_r.ok:
                 result["task_completed"] = task_id
             else:
