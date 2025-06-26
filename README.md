@@ -2,6 +2,13 @@
 
 A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web Apps, Azure Functions (Python), Azure OpenAI (Assistants API), and Azure Data API Builder (DAB) with a SQL-backed Tasks table.
 
+
+## Live Demo & API
+- **Site:** <a href="https://lemon-pebble-088965b1e.1.azurestaticapps.net/" target="_blank">https://lemon-pebble-088965b1e.1.azurestaticapps.net/</a>
+- **Data API:** <a href="https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks" target="_blank">https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks</a>
+
+
+
 ## What this app does
 - Lets users manage tasks using natural language (e.g., "remind me to buy milk", "remove task 2", "what do I need to do?"), including context-aware questions like "do I have to buy anything?".
 - Supports add, remove, list, and complete actions on a shared to-do list, using task IDs for precise actions.
@@ -190,6 +197,13 @@ The agent will understand your intent, manage your tasks, and keep the conversat
 - **Azure SQL Database** (task storage)
 - **Azure Data API Builder** (REST API for SQL)
 - **Azure OpenAI (Assistants API)** (AI agent)
+
+## Recommended VS Code Extensions
+- Python
+- SQL Server (mssql)
+- Azure Static Web Apps
+- GitHub Copilot
+- GitHub Actions
 
 ---
 
