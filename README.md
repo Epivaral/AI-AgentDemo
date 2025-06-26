@@ -4,7 +4,7 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 
 ## What this app does
 - Lets users manage tasks using natural language (e.g., "remind me to buy milk", "remove task 2", "what do I need to do?").
-- Supports add, remove, and list actions on a shared to-do list.
+- Supports add, remove, list, and complete actions on a shared to-do list.
 - Handles casual chat and suggestions, not just task management.
 - All task data is stored in a SQL database and accessed via a RESTful Data API.
 - The AI agent interprets user input and manages tasks via the backend.
@@ -23,6 +23,29 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
   - Azure Functions runs the Python API.
   - Azure SQL Database stores tasks.
   - Azure OpenAI provides the AI assistant.
+
+---
+
+## How to use
+
+Interact with the chatbox using natural language. Here are some example commands you can use:
+
+- **Add a task:**
+  - `remind me to buy milk`
+  - `add walk the dog`
+- **Remove a task:**
+  - `remove task 2`
+- **Show your tasks:**
+  - `what do I need to do?`
+  - `list my tasks`
+- **Mark a task as completed:**
+  - `mark task 2 as done`
+  - `complete task 3`
+- **Chat or ask for suggestions:**
+  - `what should I eat for lunch?`
+  - `tell me a joke`
+
+The agent will understand your intent, manage your tasks, and keep the conversation context-aware.
 
 ---
 
@@ -53,8 +76,8 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 - Implement the function to:
   - Accept POST requests with a `message` and optional `thread_id`.
   - Use the OpenAI Assistants API to send/receive messages, maintaining thread context.
-  - Parse the assistant's JSON reply to determine the action (add, remove, show, chat, etc).
-  - For task actions, call the DAB REST API to add, remove, or list tasks in SQL.
+  - Parse the assistant's JSON reply to determine the action (add, remove, show, complete, chat, etc).
+  - For task actions, call the DAB REST API to add, remove, complete, or list tasks in SQL.
   - Return the assistant's reply, any task results, and the thread ID to the frontend.
 - Set environment variables for your OpenAI endpoint, API key, and Assistant ID.
 
@@ -74,7 +97,7 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 
 ### 6. Test and iterate
 - Open your deployed app in a browser.
-- Try commands like "add walk the dog", "remove 2", or "what do I need to do?".
+- Try commands like "add walk the dog", "remove 2", "what do I need to do?", or "mark task 2 as done".
 - The agent should manage your tasks and chat with you, with context preserved across messages.
 - Debug and improve as needed (e.g., error handling, UI tweaks, assistant instructions).
 
