@@ -2,6 +2,51 @@ import { useState, useEffect, useRef } from 'react';
 import './TaskAgentChatbox.css';
 
 const BACKEND_URL = '/api/chat'; // Use relative path for Azure Static Web Apps
+const TASKS_API = '/data-api/api/Tasks'; // DAB endpoint for tasks
+
+// Notification component for pending tasks
+function PendingTasksNotification() {
+  const [pendingCount, setPendingCount] = useState(null);
+  const [visible, setVisible] = useState(false);
+  const timerRef = useRef();
+
+  useEffect(() => {
+    let intervalId;
+    async function fetchPending() {
+      try {
+        const res = await fetch(TASKS_API);
+        const data = await res.json();
+        if (data && Array.isArray(data.value)) {
+          const count = data.value.filter(t => !t.Completed).length;
+          setPendingCount(count);
+          setVisible(true);
+          clearTimeout(timerRef.current);
+          timerRef.current = setTimeout(() => setVisible(false), 5000);
+        }
+      } catch {
+        // ignore errors
+      }
+    }
+    fetchPending(); // initial fetch
+    intervalId = setInterval(fetchPending, 15000);
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  if (!visible || pendingCount === null) return null;
+  return (
+    <div className="pending-tasks-notification">
+      <span className="email-icon" aria-label="pending tasks">✉️</span>
+      <span className="pending-text">
+        {pendingCount === 1
+          ? 'You have 1 pending task to complete'
+          : `You have ${pendingCount} pending tasks to complete`}
+      </span>
+    </div>
+  );
+}
 
 export default function TaskAgentChatbox() {
   const [messages, setMessages] = useState([
@@ -73,6 +118,7 @@ export default function TaskAgentChatbox() {
 
   return (
     <div className="task-agent-chatbox">
+      <PendingTasksNotification />
       <div className="chat-messages">
         {messages.map((msg, i) => (
           <div key={i} className={`chat-msg ${msg.sender} ${msg.type || ''}`.trim()}>
