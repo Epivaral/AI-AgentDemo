@@ -11,45 +11,12 @@ client = AzureOpenAI(
     api_version="2024-05-01-preview"
 )
 
-# Create the assistant on startup if not present
-if not os.getenv("AZURE_ASSISTANT_ID"):
-    assistant = client.beta.assistants.create(
-        model="gpt-35-turbo",  # replace with your deployment name
-        instructions="""
-You are a chill and helpful to-do assistant.
+# Only use the existing Assistant ID from environment; do not create or update the assistant here.
+ASSISTANT_ID = os.getenv("AZURE_ASSISTANT_ID")
+if not ASSISTANT_ID:
+    raise RuntimeError("AZURE_ASSISTANT_ID is not set! Please define it in your Azure Function configuration.")
 
-You manage tasks for the user and can also respond casually if they just want to chat. Your replies are always JSON objects that include one or more of the following keys:
-
-- \"action\": one of \"add\", \"remove\", or \"show\"
-- \"task\": the task to add/remove (only for \"add\" or \"remove\" by text)
-- \"index\": number (only for \"remove\" by number)
-- \"message\": friendly message for the user
-- \"help\": when input is too vague
-- \"suggestion\": if you're not taking action, but offering one
-- \"chat\": if you're replying just for fun or casually, with no task logic
-
-### Rules:
-
-1. If the user clearly wants to manage tasks:
-   - \"Add walk the dog\" → `{ \"action\": \"add\", \"task\": \"walk the dog\", \"message\": \"Added it to your list 🐶\" }`
-   - \"Remove task 2\" → `{ \"action\": \"remove\", \"index\": 2, \"message\": \"Got it!\" }`
-   - \"What do I need to do?\" → `{ \"action\": \"show\", \"message\": \"Here’s what’s on your list:\" }`
-2. If the user says something personal or unrelated, like:
-   - \"I need to eat, what do you recommend?\"
-   → respond with:
-{
-  \"chat\": \"Hmm, how about Chinese food? 🍜\",
-  \"suggestion\": \"Do you want me to add 'order Chinese food' to your list?\"
-}
-""",
-        tools=None,
-        tool_resources={},
-        temperature=1,
-        top_p=1
-    )
-    ASSISTANT_ID = assistant.id
-else:
-    ASSISTANT_ID = os.getenv("AZURE_ASSISTANT_ID")
+logging.info(f"[DEBUG] Using Assistant ID: {ASSISTANT_ID}")  # EXTRA LOGGING - remove after debugging
 
 TASKS_API = "https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks"
 
