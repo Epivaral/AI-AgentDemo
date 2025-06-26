@@ -90,7 +90,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=500,
                 mimetype="application/json"
             )
-        reply_json = json.loads(reply)
+        # Robust JSON parsing with fallback
+        try:
+            reply_json = json.loads(reply)
+        except Exception as e:
+            # Return a user-friendly error and log the raw reply
+            return func.HttpResponse(
+                json.dumps({
+                    "error": "Assistant returned an invalid response. Please try rephrasing your request.",
+                    "raw_reply": reply,
+                    "thread_id": thread.id
+                }),
+                status_code=500,
+                mimetype="application/json"
+            )
     except Exception as e:
         return func.HttpResponse(
             json.dumps({"error": f"Invalid response from assistant: {str(e)}", "raw_reply": reply if 'reply' in locals() else None, "thread_id": thread.id if 'thread' in locals() else None}),
@@ -101,7 +114,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # Handle actions
     action = reply_json.get("action")
     message = reply_json.get("message", "")
-    result = {"message": message}
+    result = {"message": message, "raw_reply": reply}  # Always include raw_reply for debugging
 
     if action == "add":
         task = reply_json.get("task")
