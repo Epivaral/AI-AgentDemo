@@ -16,6 +16,9 @@ ASSISTANT_ID = os.getenv("AZURE_ASSISTANT_ID")
 if not ASSISTANT_ID:
     raise RuntimeError("AZURE_ASSISTANT_ID is not set! Please define it in your Azure Function configuration.")
 
+# [DEBUG] Log Assistant ID and first 200 chars of instructions (remove after debugging)
+info = client.beta.assistants.retrieve(ASSISTANT_ID)
+logging.info(f"[DEBUG] Instructions being used: {info.instructions[:200]}")
 logging.info(f"[DEBUG] Using Assistant ID: {ASSISTANT_ID}")  # EXTRA LOGGING - remove after debugging
 
 TASKS_API = "https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks"
