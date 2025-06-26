@@ -2,6 +2,7 @@ body {
   margin: 0;
   padding: 0;
   background: #C5E4BD;
+  padding-top: 80px; /* Add space for fixed title */
 }
 .page-title {
   background: #111;
@@ -12,6 +13,12 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
   letter-spacing: 1px;
   margin-bottom: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 .instructions {
   text-align: center;
@@ -42,25 +49,30 @@ body {
   padding: 1rem;
   overflow-y: auto;
   min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 .chat-msg {
   margin: 8px 0;
   padding: 12px 16px;
   border-radius: 12px;
-  width: 100%;
+  max-width: 80%;
+  min-width: 48px;
+  width: auto;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   word-break: break-word;
   box-sizing: border-box;
+  display: inline-block;
 }
 .chat-msg.agent {
   background: #f1f3fa;
   color: #333;
-  text-align: left;
+  align-self: flex-start;
 }
 .chat-msg.user {
   background: #d1e7dd;
   color: #1b4332;
-  text-align: right;
+  align-self: flex-end;
 }
 .chat-msg.agent.tasks {
   background: #f1f3fa;
