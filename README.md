@@ -2,6 +2,7 @@
 
 A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web Apps, Azure Functions (Python), Azure OpenAI (Assistants API), and Azure Data API Builder (DAB) with a SQL-backed Tasks table.
 
+![frontpage](img/page.png)
 
 ## Live Demo & API
 - **Site:** <a href="https://lemon-pebble-088965b1e.1.azurestaticapps.net/" target="_blank">https://lemon-pebble-088965b1e.1.azurestaticapps.net/</a>
@@ -21,7 +22,7 @@ A full-stack AI-powered to-do/chat agent web app using React, Azure Static Web A
 
 ## How it works
 
-![Diagram](diagram.png)
+![Diagram](img/diagram.png)
 
 - **Frontend:** React app with a modern chatbox UI, color-coded bubbles for different actions, persistent chat context, a floating notification for pending tasks, and a loading screen while the Data API is waking up.
 - **Backend:** Azure Functions (Python) exposes an `/api/chat` endpoint. It:
