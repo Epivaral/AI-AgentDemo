@@ -64,21 +64,42 @@ export default function TaskAgentChatbox() {
     }
   };
 
+  // Helper to parse task string: "#2: Buy milk [Pending]"
+  function parseTaskString(taskStr) {
+    const match = taskStr.match(/^#(\d+):\s(.+)\s\[(Done|Pending)\]$/);
+    if (!match) return null;
+    return { id: match[1], text: match[2], status: match[3] };
+  }
+
   return (
     <div className="task-agent-chatbox">
       <div className="chat-messages">
         {messages.map((msg, i) => (
           <div key={i} className={`chat-msg ${msg.sender} ${msg.type || ''}`.trim()}>
             {msg.type === 'tasks' && msg.tasks ? (
-              <div>
-                {msg.text.split('\n').map((line, idx) =>
-                  msg.tasks.includes(line) && line.trim() !== '' ? (
-                    <div key={idx}><strong>{line}</strong></div>
-                  ) : (
-                    <div key={idx}>{line}</div>
-                  )
-                )}
-              </div>
+              <table className="task-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Task</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {msg.tasks.map((taskStr, idx) => {
+                    const parsed = parseTaskString(taskStr);
+                    return parsed ? (
+                      <tr key={idx}>
+                        <td>{parsed.id}</td>
+                        <td>{parsed.text}</td>
+                        <td>{parsed.status}</td>
+                      </tr>
+                    ) : (
+                      <tr key={idx}><td colSpan="3">{taskStr}</td></tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             ) : (
               msg.text.split('\n').map((line, idx) => <div key={idx}>{line}</div>)
             )}

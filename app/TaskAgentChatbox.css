@@ -160,3 +160,27 @@ body {
     display: none;
   }
 }
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 8px 0;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.task-table th, .task-table td {
+  border: 1px solid #e3d7f7; /* subtle lavender border */
+  padding: 8px 12px;
+  text-align: left;
+}
+.task-table th {
+  background: #f2dfff;
+  color: #6a1b9a;
+  font-weight: 600;
+}
+.task-table tr:nth-child(even) {
+  background: #faf6ff;
+}
+.task-table tr:nth-child(odd) {
+  background: #fff;
+}
