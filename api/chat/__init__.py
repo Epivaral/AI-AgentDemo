@@ -152,6 +152,25 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         data = r.json()
         if "value" in data:
             result["tasks"] = [f"#{t['Id']}: {t['TaskText']} [{'Done' if t['Completed'] else 'Pending'}]" for t in data["value"]]
+    elif action == "complete":
+        index = reply_json.get("index")
+        if index:
+            r = requests.get(TASKS_API)
+            data = r.json()
+            logging.info(f"Task list for completion: {data}")
+            logging.info(f"Requested index for completion: {index}")
+            if "value" in data and len(data["value"]) >= index:
+                task_id = data["value"][index-1]["Id"]
+                logging.info(f"Task ID to complete: {task_id}")
+                # PATCH request to set Completed = true
+                patch_r = requests.patch(f"{TASKS_API}/Id/{task_id}", json={"Completed": True})
+                logging.info(f"Patch response status: {patch_r.status_code}, body: {patch_r.text}")
+                if patch_r.ok:
+                    result["task_completed"] = index
+                else:
+                    result["error"] = f"Failed to complete task. Status: {patch_r.status_code}, Response: {patch_r.text}"
+            else:
+                result["error"] = f"Task index out of range. Index: {index}, Task count: {len(data['value']) if 'value' in data else 0}"
     for k in ["chat", "suggestion", "help"]:
         if k in reply_json:
             result[k] = reply_json[k]

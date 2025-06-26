@@ -50,6 +50,7 @@ export default function TaskAgentChatbox() {
       }
       if (data.task_added) type = 'add';
       if (data.task_removed) type = 'remove';
+      if (data.task_completed) type = 'complete';
       if (data.chat && !data.action) {
         reply += data.chat + '\n';
         type = 'chat';
