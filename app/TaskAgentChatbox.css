@@ -164,19 +164,20 @@ body {
   width: 100%;
   border-collapse: collapse;
   margin: 8px 0 8px 0;
-  font-size: 1rem;
+  font-size: 0.92rem; /* reduced from 1rem */
   background: #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 .task-table th, .task-table td {
   border: 1px solid #e3d7f7; /* subtle lavender border */
-  padding: 8px 12px;
+  padding: 4px 6px; /* reduced from 8px 12px */
   text-align: left;
 }
 .task-table th {
   background: #f2dfff;
   color: #6a1b9a;
   font-weight: 600;
+  font-size: 0.98rem; /* slightly smaller */
 }
 .task-table tr:nth-child(even) {
   background: #faf6ff;
