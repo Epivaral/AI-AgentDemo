@@ -53,6 +53,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Use the Assistants API flow with persistent thread
         if thread_id:
             thread = client.beta.threads.retrieve(thread_id=thread_id)
+            # Check for any active runs and wait for them to finish before adding a new message
+            active_run = None
+            runs = client.beta.threads.runs.list(thread_id=thread_id)
+            for r in runs.data:
+                if r.status not in ["completed", "failed", "cancelled"]:
+                    active_run = r
+                    break
+            if active_run:
+                import time
+                max_wait = 60  # seconds
+                waited = 0
+                while active_run.status not in ["completed", "failed", "cancelled"] and waited < max_wait:
+                    active_run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=active_run.id)
+                    if active_run.status in ["completed", "failed", "cancelled"]:
+                        break
+                    time.sleep(0.5)
+                    waited += 0.5
+                if active_run.status not in ["completed", "failed", "cancelled"]:
+                    return func.HttpResponse(
+                        json.dumps({"error": f"Previous run is still active after waiting {max_wait} seconds. Please try again.", "thread_id": thread_id}),
+                        status_code=429,
+                        mimetype="application/json"
+                    )
         else:
             thread = client.beta.threads.create()
         # Add user message with tasks context prepended

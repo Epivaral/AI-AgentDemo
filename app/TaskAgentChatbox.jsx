@@ -49,12 +49,17 @@ function PendingTasksNotification() {
 }
 
 export default function TaskAgentChatbox() {
+  // Always reset threadId on app load
+  useEffect(() => {
+    localStorage.removeItem('threadId');
+  }, []);
+
   const [messages, setMessages] = useState([
     { sender: 'agent', text: 'Hi! I can help you manage your tasks or just chat. Try: "Please remind me to buy milk" or "What do I need to do?"', type: 'info' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [threadId, setThreadId] = useState(() => localStorage.getItem('threadId') || null);
+  const [threadId, setThreadId] = useState(null);
   const [initialTasks, setInitialTasks] = useState(null); // null = not loaded, [] = loaded but empty
   const [showInitialLoading, setShowInitialLoading] = useState(true);
   const chatEndRef = useRef(null);
