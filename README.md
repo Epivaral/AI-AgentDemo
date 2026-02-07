@@ -4,10 +4,6 @@ A full-stack, joyful AI-powered to-do/chat agent web app using React, Azure Stat
 
 ![frontpage](img/page.png)
 
-## Live Demo & API
-- **Site:** <a href="https://purple-pond-030ad401e.2.azurestaticapps.net/" target="_blank">https://purple-pond-030ad401e.2.azurestaticapps.net/</a>
-- **Data API:** <a href="https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks" target="_blank">https://purple-pond-030ad401e.2.azurestaticapps.net/data-api/api/Tasks</a>
-
 
 ## What this app does
 - Lets users manage tasks using natural language (e.g., "remind me to buy milk", "remove task 2", "what do I need to do?"), including context-aware questions like "do I have to buy anything?" or "do I have to visit someone?".
